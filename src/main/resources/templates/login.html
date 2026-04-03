@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskify – Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d0f;
+            --surface: #16161a;
+            --border: rgba(255,255,255,0.07);
+            --accent: #7b61ff;
+            --accent-glow: rgba(123,97,255,0.25);
+            --accent2: #ff6b6b;
+            --text: #f0f0f5;
+            --muted: #6b6b80;
+            --success: #4ade80;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; }
+        .orb-1 { width: 500px; height: 500px; background: rgba(123,97,255,0.12); top: -150px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(255,107,107,0.08); bottom: -100px; right: -100px; }
+
+        .card {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 420px; margin: 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px 36px;
+            animation: fadeUp 0.4s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .tagline { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+
+        label {
+            display: block; font-size: 12px; font-weight: 500;
+            color: var(--muted); text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 8px;
+        }
+
+        .field { margin-bottom: 18px; }
+
+        input {
+            width: 100%; padding: 13px 16px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 14px;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input::placeholder { color: var(--muted); }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+        .login-btn {
+            width: 100%; padding: 14px; margin-top: 8px;
+            background: var(--accent); border: none; border-radius: 10px;
+            color: white; font-family: 'Syne', sans-serif;
+            font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+        }
+        .login-btn:hover { background: #6d52f0; box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px); }
+        .login-btn:active { transform: translateY(0); }
+        .login-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .error-msg {
+            display: none; margin-top: 16px; padding: 12px 14px;
+            background: rgba(255,107,107,0.08);
+            border: 1px solid rgba(255,107,107,0.3);
+            border-radius: 8px; font-size: 13px;
+            color: var(--accent2); text-align: center;
+        }
+
+        .divider { text-align: center; font-size: 12px; color: var(--muted); margin: 20px 0; }
+
+        .register-link { display: block; text-align: center; font-size: 13px; color: var(--muted); }
+        .register-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+        .register-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="card">
+    <div class="logo">Taskify</div>
+    <p class="tagline">Sign in to manage your tasks</p>
+
+    <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter') login()">
+    </div>
+
+    <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter') login()">
+    </div>
+
+    <button class="login-btn" id="loginBtn" onclick="login()">Sign In</button>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="divider">— or —</div>
+    <span class="register-link">Don't have an account? <a href="/auth/">Create one</a></span>
+</div>
+
+<script>
+    // Already logged in → skip to dashboard
+    const existing = localStorage.getItem("token");
+    if (existing && existing !== "null" && existing !== "undefined" && existing.trim() !== "") {
+        window.location.href = "/dashboard";
+    }
+
+    function showError(msg) {
+        const el = document.getElementById("errorMsg");
+        el.textContent = msg;
+        el.style.display = "block";
+    }
+
+    function hideError() {
+        document.getElementById("errorMsg").style.display = "none";
+    }
+
+    async function login() {
+        hideError();
+
+        const email    = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        if (!email || !password) {
+            showError("Please enter your email and password.");
+            return;
+        }
+
+        const btn = document.getElementById("loginBtn");
+        btn.disabled = true;
+        btn.textContent = "Signing in…";
+
+        try {
+            // ✅ Your backend uses @RequestParam — send as URL query params
+            const params = new URLSearchParams();
+            params.append("email", email);
+            params.append("password", password);
+
+            const res = await fetch("/auth/login", {
+                method: "POST",
+                // ✅ Content-Type must match — form encoded, NOT application/json
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: params
+            });
+
+            // ✅ Your backend returns plain text, NOT JSON
+            const text = await res.text();
+
+            console.log("Status:", res.status);
+            console.log("Response:", text);
+
+            // ── Known backend error strings ──
+            if (text === "User not found!" || text === "Invalid password!") {
+                showError(text);
+                return;
+            }
+
+            if (!res.ok || text.trim() === "") {
+                showError("Login failed. Please try again.");
+                return;
+            }
+
+            // ── text IS the JWT token → save → redirect ──
+            localStorage.setItem("token", text.trim());
+            window.location.href = "/auth/dashboard";
+
+        } catch (err) {
+            console.error("Login error:", err);
+            showError("Network error. Please check your connection.");
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Sign In";
+        }
+    }
+</script>
+
+</body>
+</html>

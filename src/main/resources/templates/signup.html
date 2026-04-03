@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskify – Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d0f;
+            --surface: #16161a;
+            --border: rgba(255,255,255,0.07);
+            --accent: #7b61ff;
+            --accent-glow: rgba(123,97,255,0.25);
+            --accent2: #ff6b6b;
+            --text: #f0f0f5;
+            --muted: #6b6b80;
+            --success: #4ade80;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; }
+        .orb-1 { width: 500px; height: 500px; background: rgba(123,97,255,0.12); top: -150px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(255,107,107,0.08); bottom: -100px; right: -100px; }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            margin: 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px 36px;
+            animation: fadeUp 0.4s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 32px;
+        }
+
+        /* FLOATING LABEL FIELD */
+        .field {
+            position: relative;
+            margin-bottom: 22px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 16px 16px 6px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .field input::placeholder { color: transparent; }
+        .field input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .field label {
+            position: absolute;
+            top: 50%;
+            left: 16px;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: var(--muted);
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        /* Float label up when focused or has value */
+        .field input:focus + label,
+        .field input:not(:placeholder-shown) + label {
+            top: 10px;
+            font-size: 10px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        /* PASSWORD STRENGTH */
+        .strength-bar {
+            display: none;
+            margin-top: 8px;
+            height: 3px;
+            border-radius: 4px;
+            background: var(--border);
+            overflow: hidden;
+        }
+        .strength-fill {
+            height: 100%;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s, background 0.3s;
+        }
+        .strength-label {
+            display: none;
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* SUBMIT BUTTON */
+        .signup-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 4px;
+            background: var(--accent);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .signup-btn:hover {
+            background: #6d52f0;
+            box-shadow: 0 4px 24px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+        .signup-btn:active { transform: translateY(0); }
+        .signup-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ERROR / SUCCESS MSG */
+        .msg {
+            display: none;
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+        }
+        .msg.error {
+            background: rgba(255,107,107,0.08);
+            border: 1px solid rgba(255,107,107,0.3);
+            color: var(--accent2);
+        }
+        .msg.success {
+            background: rgba(74,222,128,0.08);
+            border: 1px solid rgba(74,222,128,0.3);
+            color: var(--success);
+        }
+
+        .divider { text-align: center; font-size: 12px; color: var(--muted); margin: 20px 0; }
+
+        .login-link { display: block; text-align: center; font-size: 13px; color: var(--muted); }
+        .login-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+        .login-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="card">
+    <div class="logo">Taskify</div>
+    <p class="tagline">Create your account and start organizing</p>
+
+    <!-- NAME -->
+    <div class="field">
+        <input type="text" id="name" placeholder="Name" autocomplete="name">
+        <label for="name">Full Name</label>
+    </div>
+
+    <!-- EMAIL -->
+    <div class="field">
+        <input type="email" id="email" placeholder="Email" autocomplete="email">
+        <label for="email">Email Address</label>
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="field">
+        <input type="password" id="password" placeholder="Password" autocomplete="new-password" oninput="checkStrength(this.value)">
+        <label for="password">Password</label>
+        <div class="strength-bar" id="strengthBar"><div class="strength-fill" id="strengthFill"></div></div>
+        <div class="strength-label" id="strengthLabel"></div>
+    </div>
+
+    <!-- CONFIRM PASSWORD -->
+    <div class="field">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" autocomplete="new-password">
+        <label for="confirmPassword">Confirm Password</label>
+    </div>
+
+    <button class="signup-btn" id="signupBtn" onclick="signup()">Create Account</button>
+
+    <div class="msg" id="msg"></div>
+
+    <div class="divider">— or —</div>
+    <span class="login-link">Already have an account? <a href="/auth/login">Sign in</a></span>
+</div>
+
+<script>
+    // If already logged in, skip signup
+    const existing = localStorage.getItem("token");
+    if (existing && existing !== "null" && existing !== "undefined") {
+        window.location.href = "/dashboard";
+    }
+
+    // ── PASSWORD STRENGTH ────────────────────────────────────────
+    function checkStrength(val) {
+        const bar   = document.getElementById("strengthBar");
+        const fill  = document.getElementById("strengthFill");
+        const label = document.getElementById("strengthLabel");
+
+        if (!val) {
+            bar.style.display = "none";
+            label.style.display = "none";
+            return;
+        }
+
+        bar.style.display = "block";
+        label.style.display = "block";
+
+        let score = 0;
+        if (val.length >= 8)              score++;
+        if (/[A-Z]/.test(val))            score++;
+        if (/[0-9]/.test(val))            score++;
+        if (/[^A-Za-z0-9]/.test(val))     score++;
+
+        const levels = [
+            { pct: "25%", color: "#ff6b6b", text: "Weak" },
+            { pct: "50%", color: "#f59e0b", text: "Fair" },
+            { pct: "75%", color: "#a78bfa", text: "Good" },
+            { pct: "100%",color: "#4ade80", text: "Strong" },
+        ];
+
+        const lvl = levels[score - 1] || levels[0];
+        fill.style.width      = lvl.pct;
+        fill.style.background = lvl.color;
+        label.style.color     = lvl.color;
+        label.textContent     = lvl.text;
+    }
+
+    // ── SHOW MESSAGE ─────────────────────────────────────────────
+    function showMsg(text, type) {
+        const el = document.getElementById("msg");
+        el.textContent = text;
+        el.className = `msg ${type}`;
+        el.style.display = "block";
+    }
+
+    function hideMsg() {
+        document.getElementById("msg").style.display = "none";
+    }
+
+    // ── SIGNUP ───────────────────────────────────────────────────
+    async function signup() {
+        hideMsg();
+
+        const name     = document.getElementById("name").value.trim();
+        const email    = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const confirm  = document.getElementById("confirmPassword").value;
+
+        // ── Validation ──
+        if (!name) { showMsg("Please enter your name.", "error"); return; }
+        if (!email || !/\S+@\S+\.\S+/.test(email)) { showMsg("Please enter a valid email.", "error"); return; }
+        if (password.length < 6) { showMsg("Password must be at least 6 characters.", "error"); return; }
+        if (password !== confirm) { showMsg("Passwords do not match.", "error"); return; }
+
+        const btn = document.getElementById("signupBtn");
+        btn.disabled = true;
+        btn.textContent = "Creating account…";
+
+        try {
+            const res = await fetch("/auth/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                showMsg(data.message || data.error || "Signup failed. Please try again.", "error");
+                return;
+            }
+
+            // ── If backend auto-logs in and returns a token, save it ──
+            const token = data.token || data.accessToken || data.access_token;
+            if (token) {
+                localStorage.setItem("token", token);
+                showMsg("Account created! Redirecting…", "success");
+                setTimeout(() => { window.location.href = "/dashboard"; }, 1000);
+            } else {
+                // Backend requires manual login after signup
+                showMsg("Account created! Please sign in.", "success");
+                setTimeout(() => { window.location.href = "/auth/login"; }, 1500);
+            }
+
+        } catch (err) {
+            console.error("Signup error:", err);
+            showMsg("Network error. Please check your connection.", "error");
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Create Account";
+        }
+    }
+
+    // Enter key support
+    document.addEventListener("keydown", e => {
+        if (e.key === "Enter") signup();
+    });
+</script>
+
+</body>
+</html>
